@@ -127,8 +127,15 @@ public class EchoServer1 extends AbstractServer
    */
   protected void serverStarted()
   {
-      closed = false;
-	  System.out.println("Server listening for connections on port " + getPort());
+      try{
+	listen();
+	setClosed(false);
+	System.out.println
+    ("Server listening for connections on port " + getPort());
+	}
+	catch (IOException e) {
+		System.out.println(e.toString());
+	}
   }
 
   /**
@@ -137,9 +144,10 @@ public class EchoServer1 extends AbstractServer
    */
   protected void serverStopped()
   {
-	  this.stopListening();
-	  closed = true;
-	  System.out.println("Server has stopped listening for connections.");
+	this.stopListening();
+	  setClosed(true);
+    System.out.println
+      ("Server has stopped listening for connections.");	  
   }
   
   protected Boolean isClosed() {
