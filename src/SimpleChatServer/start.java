@@ -13,7 +13,7 @@ public class start extends ServerNotConnectedCommand{
 		{
 			getServer().listen();
 			getServer().setClosed(false);
-			getServer().handleMessageFromUser("Server has started listening.");
+			getServer().getConsole().display("Server has started listening.");
 			getServer().getConsole().display("Server listening for connections on port " + getServer().getPort());
 		}
 		catch(IOException e)
