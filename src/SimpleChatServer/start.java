@@ -9,18 +9,10 @@ public class start extends ServerNotConnectedCommand{
 	}//end start
 	
 	public void doCmd(){
-		try
-		{
-			getServer().listen();
-			getServer().setClosed(false);
-			getServer().handleMessageFromUser("Server has started listening.");
-			getServer().getConsole().display("Server listening for connections on port " + getServer().getPort());
-		}
-		catch(IOException e)
-		{
-			getServer().getConsole().display("IOException while starting server.");
-			return;
-		}//end try-catch block
+		if (getServer().isClosed())
+			getServer().serverStarted();		
+		else 
+			System.out.println("Server is not closed");
 		
 	}//end doCmb()
 	
