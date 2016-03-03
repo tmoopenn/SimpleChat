@@ -433,7 +433,7 @@ public abstract class AbstractServer implements Runnable
    *  sent the message.
    */
   protected abstract void handleMessageFromClient(
-    Object msg, ConnectionToClient client);
+    String msg, ConnectionToClient client);
 
 
 // METHODS TO BE USED FROM WITHIN THE FRAMEWORK ONLY ----------------
@@ -451,7 +451,7 @@ public abstract class AbstractServer implements Runnable
    *  sent the message.
    */
   final synchronized void receiveMessageFromClient(
-    Object msg, ConnectionToClient client)
+    String msg, ConnectionToClient client)
   {
     this.handleMessageFromClient(msg, client);
   }

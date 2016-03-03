@@ -18,7 +18,7 @@ public class Channel {
 	private ArrayList<ConnectionToClient> clients;
 	
 	/**
-	 * Name of the channel given by integer.
+	 * Name of the channel 
 	 */
 	private String channelName;
 	
@@ -26,15 +26,15 @@ public class Channel {
 	 * Server to which the channel belongs
 	 * 
 	 */
-	private AbstractServer server;
+	private EchoServer1 server;
 	
-	public Channel(String channelName, AbstractServer thisServer, ArrayList<ConnectionToClient> myClients) {
+	public Channel(String channelName, EchoServer1 thisServer, ArrayList<ConnectionToClient> myClients) {
 		server = thisServer;
 		this.channelName = channelName; 
 		clients = myClients;
 	}
 	
-	public Channel(String stringFromUser, AbstractServer thisServer) {
+	public Channel(String stringFromUser, EchoServer1 thisServer) {
 		channelName = setupChannelName(stringFromUser);
 		String[] users = parseChannelUsers(stringFromUser);
 		Thread[] allClients = thisServer.getClientConnections();
@@ -49,29 +49,24 @@ public class Channel {
 	 * @param allClients Array of all ConnectionToClient clients
 	 */
 	private void setupChannelUsers(String[] users, Thread[] allClients) {
-		for (int i=0; i<users.length; i++){
-			System.out.println(users[i]);
-		}
-		here: for (int i = 0; i<users.length; i++) {
-			for (int k =0; i < allClients.length; k++) {
+		 for (int i = 0; i<users.length; i++) {
+			String user = users[i];
+			for (int k =0; k < allClients.length; k++) {
 				ConnectionToClient client = (ConnectionToClient) allClients[k];
 				String username = (String) client.getInfo("id");
-				String user = users[i];
 				if (user == null) 
-					break here; 
+					break; 
 				else {
 					if (user.equals(username)) {
 					clients.add (client);
-					break here;
+					break;
 					}
 				}
 			}	
 		}
-		for (int i=0; i<clients.size(); i++){
-			System.out.println(clients.get(i));
-		}
 	
 	}
+	
 	
 	/**
 	 * Parses the string from the user for the name of the channel and returns it.
@@ -106,6 +101,26 @@ public class Channel {
 		return users;
 	}
 	
+	public void addClient (ConnectionToClient client) {
+		clients.add(client);
+	}
+	
+	public void removeClient (ConnectionToClient client){
+		clients.remove(client);
+		server.serverUI().display(client + "has been removed from " + channelName);
+	}
+	
+	public void removeClient(String client) {
+		for (int i=0; i<clients.size(); i++) {
+			String username = (String) clients.get(i).getInfo("id");
+			if (username.equals(client)) {
+				clients.remove(clients.get(i));
+				server.serverUI().display(client + " has been removed from " + channelName);
+				return;
+			}
+		}
+	}
+	
 	public String getChannelName() {
 		return channelName;
 	}
@@ -114,7 +129,7 @@ public class Channel {
 		return clients.size();
 	}
 	
-	public AbstractServer getServer() {
+	public EchoServer1 getServer() {
 		return server;
 	}
 	

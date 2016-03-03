@@ -3,8 +3,6 @@ package common;
 import ocsf.server.*;
 import java.io.*;
 
-import SimpleChatServer.EchoServer1;
-
 /**
  *  This class handles a request from a client to login to the server.
  *
@@ -14,12 +12,10 @@ import SimpleChatServer.EchoServer1;
 public class ServerLoginHandler extends ServerMessageHandler
 {
   private String myId;
-  private String myPassword;
 
-  public ServerLoginHandler(String id, String password)
+  public ServerLoginHandler(String str)
   {
-    myId = id;
-    myPassword = password;
+    myId = str;
   }
 
   /**
@@ -30,30 +26,8 @@ public class ServerLoginHandler extends ServerMessageHandler
    */
   public void handleMessage()
   {
-	EchoServer1 server = (EchoServer1)getServer();
-	if(!server.checkExistingAccount(myId) || !server.checkPassword(myId, myPassword)){
-		try{
-			getClient().sendToClient("Incorrect username/password.");
-			getClient().close();
-		}
-		catch(IOException e){
-			
-		}
-		
-		return;
-	}//end if
-	
-   
-    getClient().setInfo("id", myId);
-    
-    try{
-    	getClient().sendToClient("Connection to " + getClient().getInfo("id") + " opened.");
-    }
-    catch(IOException e){
-    	
-    }
-    
     System.out.println(myId + " has logged on");
+    getClient().setInfo("id", myId);
     getServer().sendToAllClients("SERVER MSG> " + myId + " has joined");
   }
 

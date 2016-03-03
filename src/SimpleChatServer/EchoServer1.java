@@ -2,7 +2,6 @@ package SimpleChatServer;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import client.ChatClient1;
 import client.ClientCommand;
@@ -33,7 +32,6 @@ public class EchoServer1 extends AbstractServer
    */
   final public static int DEFAULT_PORT = 5555;
     private ArrayList<Channel> channels;
-    private HashMap<String, String> accounts;//added by Shouheng
   
 
   //Constructors ****************************************************
@@ -48,10 +46,6 @@ public class EchoServer1 extends AbstractServer
     super(port);
     myServerUI = serverUI;
     closed = false;
-    
-    accounts = new HashMap<String, String>();//added by Shouheng
-    accounts.put("guest", "123");//added by Shouheng.
-    
     initializeChannels();
     try {
     	listen();
@@ -78,11 +72,10 @@ public class EchoServer1 extends AbstractServer
    * @param client The connection from which the message originated.
    */
   public void handleMessageFromClient
-    (Object msg, ConnectionToClient client)
+    (String msg, ConnectionToClient client)
   {
 	  
-    ServerMessageHandler1 handler = (ServerMessageHandler1) msg;
-    handler.setMessage((String)msg);
+    ServerStringMessageHandler handler = new ServerStringMessageHandler (msg);
     handler.setServer(this);
     handler.setConnectionToClient(client);
     handler.handleMessage();
@@ -95,9 +88,12 @@ public class EchoServer1 extends AbstractServer
   
   
   private void sendToChannelClients(Object msg, String channel) {
-	  for (int j = 0; j < channels.size(); j++) {
-		  Channel chl = channels.get(j);
-		  if (chl.getChannelName().equals(channel)) {
+	  	Channel chl = getChannel(channel);
+	  	if (chl == null) {
+	  		serverUI().display("Channel with the name " + channel + " does not exist.");
+		  	  return;
+	  		}
+	  	else {
 			  Object[] channelClients = chl.enumerateClients();
 			  for (int i=0; i<channelClients.length; i++)
 			    {
@@ -111,42 +107,11 @@ public class EchoServer1 extends AbstractServer
 			    }
 			  return;
 		  }
-		  else {
-			  serverUI().display("Channel with the name " + channel + " does not exist.");
-		  	  return;
-		  }
-	  }
-	
-  }
-  
-//Written by Shouheng Wu
-  //This method checks whether the given ID is already an existing user
-  public boolean checkExistingAccount (String id){
-	  if (accounts.containsKey(id)){
-		  return true;
-	  }
-	  else{
-		  return false;
-	  }
-  }//end checkExistingAccount
-  
-  //Written by Shouheng Wu
-  //This method creates a user account by adding a id/password combination to the hashmap accounts
-  public void setNewAccount(String id, String password){
-	  accounts.put(id, password);
-  }//end class
-  
-  //Written by Shouheng Wu
-  //This method returns true if the provided password is correct
-  public boolean checkPassword(String id, String password){
-	  if(accounts.get(id).equals(password)){
-		  return true;
-	  }
-	  else{
-		  return false;
-	  }
+			  
+  		} 
 	  
-  }//end checkPassword
+	
+  
   
   public void handleMessageFromUser(String message){
 	  if (message.charAt(0) == '@') {
@@ -164,6 +129,21 @@ public class EchoServer1 extends AbstractServer
 	  
 	  
   }//end handleMessageFromUser
+  
+  public void sendToChannel(String message) {
+	  String channelName;
+	  int indexBlank = message.indexOf(' ');
+	  if(indexBlank == -1) {
+		  channelName = message;
+		  String msg = "";
+		  sendToChannelClients(channelName, msg);
+	  }
+	  else {
+		  channelName = message.substring(0, indexBlank);
+		  String msg = message.substring(indexBlank + 1);
+		  sendToChannelClients(msg, channelName);
+	  }
+  }
   
   public void createAndDoCommand(String message){
 	  String commandStr; 
@@ -191,6 +171,39 @@ public class EchoServer1 extends AbstractServer
 	    }
 	  
   }//end createAndDoCommand
+  
+ public Channel getChannel (String channelName) {
+	 for (int i = 0; i<channels.size(); i++){
+		 Channel chl = channels.get(i);
+		 if (chl.getChannelName().equals(channelName))
+			 return chl;
+	 }
+	 return null;
+ }
+  
+  public void removeChannel(String channelName) {
+	  Channel chl = getChannel(channelName);
+	  if (chl == null) 
+		  return; 
+	  else 
+		  channels.remove(chl);
+	  
+  }
+  
+  //public void handleLogin(String id) {
+	  
+  //}
+  
+//  private void handleLoginHelper(String id) {
+//	 Thread[] clients = getClientConnections();
+//	 for (int i = 0; i<clients.length; i++) {
+//		 ConnectionToClient client = (ConnectionToClient) clients[k];
+//		 String username = (String) client.getInfo("id");
+//		 if (username.equals(id)) {
+//			 client.setInfo("id", id);
+//		 }
+//	 }
+//  }
 
   /**
    * This method overrides the one in the superclass.  Called
@@ -219,6 +232,7 @@ public class EchoServer1 extends AbstractServer
 	  
 	  return closed;
   }
+  
 
   //Class methods ***************************************************
 
@@ -253,3 +267,4 @@ public class EchoServer1 extends AbstractServer
   
   
 }
+
